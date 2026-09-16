@@ -64,6 +64,12 @@ public class Campo {
         }
     }
 
+    void atualizar() {
+        if (aberto) {
+            notificarObservadores(CampoEvento.ATUALIZAR);
+        }
+    }
+
     public boolean abrir() {
 
         if (!aberto && !marcado) {
@@ -92,6 +98,14 @@ public class Campo {
 
     public void minar() {
         minado = true;
+    }
+
+    public void desminar() {
+        minado = false;
+    }
+
+    public boolean isMinadoEMarcado() {
+        return minado && marcado;
     }
 
     public boolean isMinado() {

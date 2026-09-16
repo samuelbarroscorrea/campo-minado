@@ -1,5 +1,5 @@
 package br.com.coder.cm.modelo;
 
 public enum CampoEvento {
-    ABRIR, MARCAR, DESMARCAR, EXPLODIR, REINICIAR
+    ABRIR, MARCAR, DESMARCAR, EXPLODIR, REINICIAR, ATUALIZAR
 }

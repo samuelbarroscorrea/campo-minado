@@ -1,5 +1,6 @@
 package br.com.coder.cm.modelo;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -12,6 +13,9 @@ public class Tabuleiro implements CampoObservador{
 
     private final List<Campo> campos = new ArrayList<>();
     private final List<Consumer<Boolean>> observadores = new ArrayList<>();
+    private final List<Consumer<Integer>> observadoresMovimento = new ArrayList<>();
+
+    private int movimentos = 0;
 
     public Tabuleiro(int linhas, int colunas, int minas) {
         this.linhas = linhas;
@@ -32,15 +36,42 @@ public class Tabuleiro implements CampoObservador{
 
     }
 
+    public void registrarObservadorMovimento(Consumer<Integer> observador) {
+        observadoresMovimento.add(observador);
+    }
+
+    private void notificarMovimento() {
+        observadoresMovimento.forEach(o -> o.accept(movimentos));
+    }
+
     private void notificarObservadores(boolean resultado) {
         observadores.stream().forEach(o -> o.accept(resultado));
     }
 
     public void abrir(int linha, int coluna) {
-        campos.parallelStream()
-                    .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
-                    .findFirst()
-                    .ifPresent(c -> c.abrir());
+        campos.stream()
+                .filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
+                .findFirst()
+                .ifPresent(c -> {
+                    boolean abriu = c.abrir();
+
+                    if (abriu && !c.isMinado()) {
+                        movimentos++;
+
+                        if (movimentos == 5) {
+                            embaralharMinas();
+
+                            campos.forEach(Campo::atualizar);
+
+                            movimentos = 0;
+                            notificarMovimento();
+
+                            JOptionPane.showMessageDialog(null, "MUDOU!");
+                        } else {
+                            notificarMovimento();
+                        }
+                    }
+                });
     }
 
 
@@ -75,10 +106,14 @@ public class Tabuleiro implements CampoObservador{
         Predicate<Campo> minado = c -> c.isMinado();
 
         do {
-
             int aleatorio = (int) (Math.random() * campos.size());
+            Campo campo = campos.get(aleatorio);
+
+            if (!campo.isAberto()) {
+                campo.minar();
+            }
+
             minasArmadas = campos.stream().filter(minado).count();
-            campos.get(aleatorio).minar();
         } while (minasArmadas < minas);
     }
 
@@ -86,8 +121,17 @@ public class Tabuleiro implements CampoObservador{
         return campos.stream().allMatch(c -> c.objetiboAlcancado());
     }
 
+    private void embaralharMinas() {
+        campos.stream()
+                .filter(c -> !c.isMinadoEMarcado())
+                .forEach(Campo::desminar);
+
+        sortearMinas();
+    }
+
     public void reiniciar() {
         campos.stream().forEach(c -> c.reiniciar());
+        movimentos = 0;
         sortearMinas();
     }
 

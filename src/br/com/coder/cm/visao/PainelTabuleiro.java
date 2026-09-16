@@ -8,23 +8,28 @@ import java.awt.*;
 @SuppressWarnings("serial")
 public class PainelTabuleiro extends JPanel {
 
-    public PainelTabuleiro(Tabuleiro tabuleiro) {
+    public PainelTabuleiro(Tabuleiro tabuleiro, JLabel contador) {
         setLayout(new GridLayout(tabuleiro.getLinhas(), tabuleiro.getColunas()));
 
-        tabuleiro.paraCada(c -> add(new CampoBotao(c)));
+        tabuleiro.paraCada(c -> add(new CampoBotao(c, tabuleiro)));
 
-        tabuleiro.registrarObservador(e -> {
+        tabuleiro.registrarObservador(resultado -> {
             SwingUtilities.invokeLater(() -> {
                 if (tabuleiro.objetiboAlcancado()) {
                     JOptionPane.showMessageDialog(this, "Ganhou !!");
                 } else {
-                    JOptionPane.showMessageDialog(this,"PERDEU");
+                    JOptionPane.showMessageDialog(this, "PERDEU");
                 }
 
                 tabuleiro.reiniciar();
+                contador.setText("Movimentos: 0");
             });
-
         });
 
+        tabuleiro.registrarObservadorMovimento(movimentos -> {
+            SwingUtilities.invokeLater(() -> {
+                contador.setText("Movimentos: " + movimentos);
+            });
+        });
     }
 }

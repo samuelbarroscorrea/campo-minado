@@ -3,6 +3,7 @@ package br.com.coder.cm.visao;
 import br.com.coder.cm.modelo.Campo;
 import br.com.coder.cm.modelo.CampoEvento;
 import br.com.coder.cm.modelo.CampoObservador;
+import br.com.coder.cm.modelo.Tabuleiro;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,9 +18,11 @@ public class CampoBotao extends JButton implements CampoObservador, MouseListene
     private final Color TEXTO_VERDE = new Color(0, 100, 0);
 
     private Campo campo;
+    private Tabuleiro tabuleiro;
 
-    public CampoBotao(Campo campo) {
+    public CampoBotao(Campo campo, Tabuleiro tabuleiro) {
         this.campo = campo;
+        this.tabuleiro = tabuleiro;
         setBorder(BorderFactory.createBevelBorder(0));
         setOpaque(true);
         setBackground(BG_PADRAO);
@@ -39,6 +42,9 @@ public class CampoBotao extends JButton implements CampoObservador, MouseListene
                 break;
             case EXPLODIR:
                 aplicarEstiloExplodir();
+                break;
+            case ATUALIZAR:
+                aplicarEstiloAbrir();
                 break;
             default:
                 aplicarEstiloPadrao();
@@ -110,9 +116,9 @@ public class CampoBotao extends JButton implements CampoObservador, MouseListene
     @Override
     public void mousePressed(MouseEvent e) {
         if (e.getButton() == 1) {
-            campo.abrir();
+            tabuleiro.abrir(campo.getLinha(), campo.getColuna());
         } else {
-            campo.alternarMarcacao();
+            tabuleiro.alternarMarcacao(campo.getLinha(), campo.getColuna());
         }
     }
 
